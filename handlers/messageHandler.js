@@ -1,6 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 const { ensureGroup } = require('../lib/groupDb');
+const { addWarn, resetWarn } = require('../lib/groupWarn'); // Pastikan kamu buat file groupWarn.js
 
 const commands = {};
 const commandFiles = fs.readdirSync(path.join(__dirname, '../commands'));
@@ -22,6 +23,7 @@ async function handleMessage(sock, m) {
   // === Ambil konfigurasi grup
   const groupConfig = from.endsWith('@g.us') ? ensureGroup(from) : {};
 
+  // Cek pelanggaran antilink di grup
   if (
     from.endsWith('@g.us') &&
     groupConfig.antilink &&
@@ -32,11 +34,34 @@ async function handleMessage(sock, m) {
     const groupAdmins = metadata.participants.filter(p => p.admin).map(p => p.id);
 
     if (!groupAdmins.includes(sender)) {
+      // Tambah warn
+      const warnCount = addWarn(from, sender);
+
       await sock.sendMessage(from, {
-        text: `🔗 Detected link! Pesan dari @${sender.split('@')[0]} dihapus.`,
+        text: `⚠️ @${sender.split('@')[0]} mengirim link, peringatan ke-${warnCount}/3.`,
         mentions: [sender]
       });
+
+      if (warnCount >= 3) {
+        await sock.sendMessage(from, {
+          text: `🚫 @${sender.split('@')[0]} sudah 3x peringatan, akan dikeluarkan dari grup.`,
+          mentions: [sender]
+        });
+
+        try {
+          await sock.groupRemove(from, [sender]);
+          resetWarn(from, sender);
+        } catch (e) {
+          await sock.sendMessage(from, {
+            text: `⚠️ Gagal mengeluarkan @${sender.split('@')[0]}.`,
+            mentions: [sender]
+          });
+        }
+      }
+
+      // Hapus pesan pelanggaran
       await sock.sendMessage(from, { delete: m.key });
+      return; // stop proses command supaya gak lanjut
     }
   }
 
