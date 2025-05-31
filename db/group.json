@@ -1,0 +1,35 @@
+{
+  "120363398111946057@g.us": {
+    "antilink": true,
+    "welcome": "",
+    "goodbye": "",
+    "welcomeOn": false,
+    "antidelete": true
+  },
+  "120363417293566937@g.us": {
+    "antilink": false,
+    "welcome": "Halo @user, selamat datang di grup @group!\n Intro dulu ya:\n - Nama: \n - Umur: \n - Askot: \n - Gender: \n - Status: \n Terima kasih sudah mengisi, semoga betah di grup ini!\n Pastikan sudah baca peraturannya yaa ^^",
+    "goodbye": "pergi yg jauh @user gausa balik lagi ke grup @group",
+    "welcomeOn": true,
+    "goodbyeOn": true,
+    "rules": "* mem baru wajib intro * dilanggar keras berbau 18+ ( klo ada tg admin ) ~*kick*~ * jgn spam gajelas ~*kick*~ * jgn ngirim link gc lain pea ~*kick*~ * ngerusuh? tg admin ~*kick*~ - no nyulik memb * jaga attitude nya bro * anti baperan *~NAJIS~* * jgn tg\" grup gjelas puki ~*CAPER*~ * toxic *sewajarnya* aja * joks *sewajarnya* jan bikin ank orng skit hati * saling *ngehargain* sesama own/mem/admin - jgn saling *ngacangin* minimal bales kek, anti kacang * jgn saling ledek ledekan *kcuali joks* * mw voice call? tg admin * foto/vid 1× :menuhin memo * cllb?? tg own/admin"
+  },
+  "120363183876858077@g.us": {
+    "antilink": false,
+    "welcome": "",
+    "goodbye": "",
+    "welcomeOn": false
+  },
+  "120363414813609947@g.us": {
+    "antilink": true,
+    "welcome": "",
+    "goodbye": "",
+    "welcomeOn": true
+  },
+  "120363297198465122@g.us": {
+    "antilink": true,
+    "welcome": "",
+    "goodbye": "",
+    "welcomeOn": true
+  }
+}
