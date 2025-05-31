@@ -23,10 +23,8 @@ module.exports = async (sock, m, args, sender, from) => {
 .rules 
 .say (text to audio)
 .lirik 
-.toimg (stiker to foto)
-.tovidio (stiker to vidio)
 .qc (quote)
-.emoji 
+.confess
 
 Ketik command dengan prefix "." ya!`;
 
