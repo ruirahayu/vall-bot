@@ -3,7 +3,7 @@ module.exports = async (sock, m, args, sender, from) => {
 
 .add
 .kick
-.antilink open/close
+.antilink on/off
 .antidelete on/off
 .demote
 .promote
