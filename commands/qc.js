@@ -1,19 +1,33 @@
 const Jimp = require('jimp');
 
-module.exports = async (sock, m, args, sender, from, saveBotMessage) => {
-  if (!args.length) {
-    const msg = await sock.sendMessage(from, { text: '❌ Kirim teks untuk dijadikan quote!' });
-    if (msg.key?.id) saveBotMessage(from, msg.key.id);
-    return;
+module.exports = async (sock, m, args, sender, from) => {
+  let text = '';
+
+  // Kalau ada args, ambil dari args
+  if (args.length) {
+    text = args.join(' ');
+  } else {
+    // Kalau gak ada args, coba cek apakah reply ke pesan teks
+    const quoted = m.message?.extendedTextMessage?.contextInfo?.quotedMessage;
+    if (quoted) {
+      // Cek tipe pesan yang direply
+      if (quoted.conversation) {
+        text = quoted.conversation;
+      } else if (quoted.extendedTextMessage?.text) {
+        text = quoted.extendedTextMessage.text;
+      } else {
+        return await sock.sendMessage(from, { text: '❌ Reply pesan teks untuk dibuat quote!' });
+      }
+    } else {
+      return await sock.sendMessage(from, { text: '❌ Kirim teks atau reply pesan teks untuk dijadikan quote!' });
+    }
   }
 
-  const text = args.join(' ');
   try {
     const width = 800;
     const height = 400;
 
     const image = new Jimp(width, height, '#1e1e1e'); // background gelap
-
     const font = await Jimp.loadFont(Jimp.FONT_SANS_32_WHITE);
 
     image.print(
@@ -31,14 +45,12 @@ module.exports = async (sock, m, args, sender, from, saveBotMessage) => {
 
     const buffer = await image.getBufferAsync(Jimp.MIME_PNG);
 
-    const sentMsg = await sock.sendMessage(from, {
+    await sock.sendMessage(from, {
       image: buffer,
       caption: '🖼️ Quote kamu nih!'
     });
-
-    if (sentMsg.key?.id) saveBotMessage(from, sentMsg.key.id);
   } catch (e) {
-    const errMsg = await sock.sendMessage(from, { text: '⚠️ Gagal buat quote.' });
-    if (errMsg.key?.id) saveBotMessage(from, errMsg.key.id);
+    console.error('Error membuat quote:', e);
+    await sock.sendMessage(from, { text: '⚠️ Gagal buat quote.' });
   }
 };
