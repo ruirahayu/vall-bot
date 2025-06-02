@@ -17,24 +17,26 @@ function normalizeJid(jid) {
 module.exports = async (sock, m, args, sender, from) => {
   if (!from.endsWith('@g.us')) return;
 
-  // Ambil info grup
   const metadata = await sock.groupMetadata(from);
   const adminIds = metadata.participants.filter(p => p.admin).map(p => p.id);
 
-  // Pastikan sender adalah admin
   if (!adminIds.includes(sender)) {
-    await sock.sendMessage(from, { text: '❌ Hanya admin yang bisa kasih warn.' });
-    return;
+    return await sock.sendMessage(from, { text: '❌ Hanya admin yang bisa kasih warn.' });
   }
 
-  // Ambil mention dari contextInfo
+  const quoted = m.message?.extendedTextMessage?.contextInfo?.participant;
   const mentioned = m.message?.extendedTextMessage?.contextInfo?.mentionedJid || [];
-  if (!mentioned.length) {
-    return await sock.sendMessage(from, { text: '❌ Tag user yang mau di-warn.' });
+
+  let target;
+  if (quoted) {
+    target = normalizeJid(quoted);
+  } else if (mentioned.length > 0) {
+    target = normalizeJid(mentioned[0]);
+  } else {
+    return await sock.sendMessage(from, { text: '❌ Harus tag user atau reply pesannya.' });
   }
 
-  const target = normalizeJid(mentioned[0]);
-  const reason = args.slice(1).join(' ') || 'Tanpa alasan';
+  const reason = args.join(' ') || 'Tanpa alasan';
 
   const db = loadGroupData();
   if (!db[from]) db[from] = {};
@@ -54,13 +56,12 @@ module.exports = async (sock, m, args, sender, from) => {
 
   if (warnCount >= 3) {
     await sock.sendMessage(from, {
-      text: `🚫 @${target.split('@')[0]} sudah dapat 3 peringatan dan akan dikeluarkan.`,
+      text: `🚫 @${target.split('@')[0]} sudah 3x diperingatkan dan akan dikeluarkan.`,
       mentions: [target]
     });
 
     await sock.groupParticipantsUpdate(from, [target], 'remove');
-
-    delete db[from].warn[target]; // Reset warn setelah kick
+    delete db[from].warn[target];
     saveGroupData(db);
   }
 };
