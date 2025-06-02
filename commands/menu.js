@@ -27,6 +27,7 @@ module.exports = async (sock, m, args, sender, from) => {
 .confess
 .warn 
 .unwarn
+.warnlist
 
 Ketik command dengan prefix "." ya!`;
 
