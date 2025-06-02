@@ -25,6 +25,8 @@ module.exports = async (sock, m, args, sender, from) => {
 .lirik 
 .qc (quote)
 .confess
+.warn 
+.unwarn
 
 Ketik command dengan prefix "." ya!`;
 
