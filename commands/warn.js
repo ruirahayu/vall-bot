@@ -1,5 +1,5 @@
 const fs = require('fs');
-const groupDbPath = './db/group.json';
+const groupDbPath = './lib/group.json';
 
 function loadGroupData() {
   if (!fs.existsSync(groupDbPath)) fs.writeFileSync(groupDbPath, '{}');
@@ -15,15 +15,23 @@ function normalizeJid(jid) {
 }
 
 module.exports = async (sock, m, args, sender, from) => {
+  if (!from.endsWith('@g.us')) return;
+
+  // Ambil info grup
   const metadata = await sock.groupMetadata(from);
   const adminIds = metadata.participants.filter(p => p.admin).map(p => p.id);
 
+  // Pastikan sender adalah admin
   if (!adminIds.includes(sender)) {
-    return await sock.sendMessage(from, { text: '❌ Hanya admin yang bisa kasih warn.' });
+    await sock.sendMessage(from, { text: '❌ Hanya admin yang bisa kasih warn.' });
+    return;
   }
 
+  // Ambil mention dari contextInfo
   const mentioned = m.message?.extendedTextMessage?.contextInfo?.mentionedJid || [];
-  if (!mentioned.length) return await sock.sendMessage(from, { text: '❌ Tag user yang mau di-warn.' });
+  if (!mentioned.length) {
+    return await sock.sendMessage(from, { text: '❌ Tag user yang mau di-warn.' });
+  }
 
   const target = normalizeJid(mentioned[0]);
   const reason = args.slice(1).join(' ') || 'Tanpa alasan';
@@ -35,8 +43,8 @@ module.exports = async (sock, m, args, sender, from) => {
 
   db[from].warn[target].count += 1;
   db[from].warn[target].reasons.push(reason);
-
   const warnCount = db[from].warn[target].count;
+
   saveGroupData(db);
 
   await sock.sendMessage(from, {
@@ -46,12 +54,13 @@ module.exports = async (sock, m, args, sender, from) => {
 
   if (warnCount >= 3) {
     await sock.sendMessage(from, {
-      text: `🚫 @${target.split('@')[0]} telah menerima 3 peringatan dan akan dikeluarkan.`,
+      text: `🚫 @${target.split('@')[0]} sudah dapat 3 peringatan dan akan dikeluarkan.`,
       mentions: [target]
     });
 
     await sock.groupParticipantsUpdate(from, [target], 'remove');
-    delete db[from].warn[target]; // reset warn
+
+    delete db[from].warn[target]; // Reset warn setelah kick
     saveGroupData(db);
   }
 };
