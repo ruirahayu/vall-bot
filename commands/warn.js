@@ -1,5 +1,5 @@
 const fs = require('fs');
-const groupDbPath = './lib/group.json';
+const groupDbPath = './db/group.json';
 
 function loadGroupData() {
   if (!fs.existsSync(groupDbPath)) fs.writeFileSync(groupDbPath, '{}');
